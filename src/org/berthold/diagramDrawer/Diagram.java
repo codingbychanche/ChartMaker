@@ -32,7 +32,7 @@ public class Diagram {
 
 	// Axis division......
 	double mainX = 1;
-	double mainY = 0.1;
+	double mainY = 1;
 
 	/**
 	 * Creates a new diagram.
@@ -104,46 +104,52 @@ public class Diagram {
 		// coordinate system.
 		//
 		if (yMin == 0)
-			y0_px = (height_px - 2 * settings.getPadY_px());
+			y0_px = (height_px - settings.getPadY_px());
 
 		else {
 			if (Math.abs(yMin) == Math.abs(yMax))
-				y0_px = ((height_px - 2 * settings.getPadY_px()) / 2);
+				y0_px = ((height_px - settings.getPadY_px()) / 2);
 
 			double f = 1;
 			if (Math.abs(yMin) > Math.abs(yMax)) {
 				f = Math.abs(yMax) / Math.abs(yMin);
-				y0_px = (int) ((int) (height_px - 2 * settings.getPadY_px()) * f);
+				y0_px = (int) ((int) (height_px -settings.getPadY_px()) * f);
 			}
 
 			if (Math.abs(yMin) < Math.abs(yMax)) {
 				f = Math.abs(yMin) / Math.abs(yMax);
-				y0_px = (int) (height_px - (int) (height_px - 2 * settings.getPadY_px()) * f);
+				y0_px = (int) (height_px - (int) (height_px -  settings.getPadY_px()) * f);
 			}
 		}
 
+		// Draw background
+		graphics.setColor(settings.getFillColor());
+		graphics.fillRect(settings.getPadX_px(),settings.getPadY_px(),width_px- settings.getPadX_px()*2 ,height_px-settings.getPadY_px()*2);
+
 		// X- axis
+		graphics.setColor(settings.getAxisColor());
 		graphics.drawLine(settings.getPadX_px(), y0_px, width_px - settings.getPadX_px(), y0_px);
 
 		// Y- axis
 		graphics.drawLine(settings.getPadX_px(), settings.getPadY_px(), settings.getPadX_px(), height_px - settings.getPadY_px());
 
 		// Draw markers for x- axis
-		graphics.setColor(Color.GRAY);
+		graphics.setColor(settings.getAxisMarkersColor());
 		stroke = new BasicStroke(0.5f);
 		graphics.setStroke(stroke);
 
 		for (double x = 0; x < width_px - 2 * settings.getPadX_px(); x = x + mainX) {
 			int xt = (int) getXT(x);
-
 			graphics.drawLine(xt, y0_px - 10, xt, y0_px + 10);
 		}
 
+
 		// Draw markers for y-axis
-		for (double yt = getYT(yMin); yt <= getYT(yMax); yt = yt + mainY) {
+		for (double y =yMin; y <= yMax; y = y + mainY) {
+			int yt= (int) getYT(y);
 			graphics.drawLine(settings.getPadX_px() - 10, (int) yt, settings.getPadX_px() + 10, (int) yt);
 		}
-		
+	
 		return graphics;
 	}
 
@@ -161,11 +167,12 @@ public class Diagram {
 		graphics.drawString(settings.getDigramName(), 2*settings.getPadX_px(),2*settings.getPadX_px());
 
 		// Lines will be joined like....
-		Stroke stroke3 = new BasicStroke(12f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
+		Stroke stroke = new BasicStroke(12f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		graphics.setStroke(stroke);
 		
 		// The color and the thikness...
-		graphics.setColor(Color.RED);
-		Stroke stroke = new BasicStroke(2f);
+		graphics.setColor(settings.getDataPointsColor());
+		stroke = new BasicStroke(settings.getDataPointThickness());
 		graphics.setStroke(stroke);
 
 		// Draw values
@@ -213,7 +220,6 @@ public class Diagram {
 			System.out.print(font.getFontName() + " : ");
 			System.out.println(font.getFamily());
 		}
-
 	}
 
 	/**

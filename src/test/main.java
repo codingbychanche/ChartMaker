@@ -19,10 +19,10 @@ public class main {
 		dataSet.add(2,5.0, "2");
 		dataSet.add(3,1.0, ".5");
 		dataSet.add(4,8.0, "12");
-		dataSet.add(5,10.0, "2");
+		dataSet.add(5,-10.0, "2");
 		
 		dataSet.add(5.5,0, "0");
-		dataSet.add(5.9,1, "1");
+		dataSet.add(5.9,0, "1");
 		dataSet.add(6,0, "2");
 		dataSet.add(7,1.0, ".5");
 		dataSet.add(8,8.0, "12");

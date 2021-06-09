@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.berthold.diagramDrawer.DataSet;
-import org.berthold.diagramDrawer.Diagram;
-import org.berthold.diagramDrawer.DiagramSettings;
+import org.berthold.diagramDrawer.Chart;
+import org.berthold.diagramDrawer.ChartSettings;
 
 public class main {
 	
@@ -27,13 +27,17 @@ public class main {
 		dataSet.add(7,1.0, ".5");
 		dataSet.add(8,8.0, "12");
 		dataSet.add(10,10.0, "2");
+		dataSet.add(11,10.0, "2");
+		dataSet.add(12,8.0, "2");
+		dataSet.add(14,5.0, "2");
+		dataSet.add(15,1.0, "2");
 	
-		DiagramSettings diagramSettings=new DiagramSettings("Sample Diagram.....");
+		ChartSettings diagramSettings=new ChartSettings("Sample Diagram.....");
 		diagramSettings.setNumberFormat(".2f");
 		diagramSettings.setPadX_px(10);
 		diagramSettings.setPadY_px(20);
 		
-		Diagram d=new Diagram(dataSet,1200,600,diagramSettings);
+		Chart d=new Chart(dataSet,1200,600,diagramSettings);
 		d.draw();
 		
 	}

@@ -3,7 +3,9 @@ package org.berthold.diagramDrawer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GradientPaint;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
@@ -72,7 +74,7 @@ public class Chart {
 
 		// Save to file.
 		try {
-			File outputfile = new File("Diagram" + ".png");
+			File outputfile = new File(settings.getDigramName());
 			ImageIO.write(img, "png", outputfile);
 		} catch (Exception e) {
 		}
@@ -154,8 +156,10 @@ public class Chart {
 			graphics.drawLine(xt, y0_px - 10, xt, y0_px + 10);
 
 			// No '0' or biggest value for x- axis!
-			if (x != 0 && x != xMax)
-				graphics.drawString(x + "", xt, y0_px + settings.getTextSizeAxixDesignators());
+			if (x != 0 && x != xMax) {
+				int xc=getHorizCenterCoordinate(x+"",xt,graphics); // Centers value below marker
+				graphics.drawString(x + "", xc, y0_px + settings.getTextSizeAxixDesignators()+settings.getMarkerLength());
+			}
 		}
 
 		// Draw markers for y-axis
@@ -163,8 +167,10 @@ public class Chart {
 			int yt = (int) getYT(y);
 			graphics.drawLine(settings.getPadX_px() - 10, (int) yt, settings.getPadX_px() + 10, (int) yt);
 
-			if (y != yMax)
-				graphics.drawString(y + "", 10, yt);
+			if (y != yMax) {
+				int yc=getVertCenterCoordinate(settings.getTextSizeAxixDesignators(),yt);
+				graphics.drawString(y + "", settings.getPadX_px()+settings.getMarkerLength(), yc);
+			}
 		}
 		return graphics;
 	}
@@ -220,7 +226,7 @@ public class Chart {
 
 		return graphics;
 	}
-
+	
 	/*
 	 * Shows all available system fonts.
 	 */
@@ -258,5 +264,38 @@ public class Chart {
 	 */
 	private double getXT(double x) {
 		return x * ((width_px - 2 * settings.getPadX_px()) / xMax) + settings.getPadX_px();
+	}
+	
+	//
+	// Algorytms....
+	//
+	/**
+	 * Display width of a string in pixels.
+	 * 
+	 * @param string
+	 * @param g Associated {@ling Graphics} object.
+	 * @return	Width of string in pixels.
+	 */
+	private int getWidth(String string,Graphics g) {
+		FontMetrics f=g.getFontMetrics();
+		return f.stringWidth(string);
+	}
+	
+	/**
+	 * Calculates the x position of the upper left corner for a
+	 * string which centers it relative to a given coordinate.
+	 *  
+	 * @param string The string.
+	 * @param x	Coordinate relative to which the given string should be centered
+	 * @param g Associated {@ling Graphics} object.
+	 * @return The upper left coordinate of the centered string.
+	 */
+	private int getHorizCenterCoordinate(String string,int x,Graphics g) {
+		int widthOfString=getWidth(string,g);
+		return x-widthOfString/2;
+	}
+	
+	private int getVertCenterCoordinate(int heightOfString,int y) {
+		return y+heightOfString/2;
 	}
 }

@@ -32,6 +32,7 @@ public class ChartSettings {
 	// X and Y axis
 	private double mainX;	// Dividers, main unit
 	private double mainY;
+	private int markerLength;
 	private int textSizeAxixDesignators;
 	private Color textColorAxisDesignators;
 
@@ -60,6 +61,8 @@ public class ChartSettings {
 		axisColor = new Color(0, 0, 30);
 		
 		axisMarkersColor = new Color(0, 0, 0);
+		
+		markerLength=10;
 
 		// Lines
 		this.dataPointThickness = 2f;
@@ -171,6 +174,14 @@ public class ChartSettings {
 
 	public double getMainY() {
 		return mainY;
+	}
+
+	public int getMarkerLength() {
+		return markerLength;
+	}
+
+	public void setMarkerLength(int markerLength) {
+		this.markerLength = markerLength;
 	}
 
 	public void setMainY(double mainY) {

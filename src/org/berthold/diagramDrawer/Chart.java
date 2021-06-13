@@ -62,14 +62,20 @@ public class Chart {
 	 */
 	public void draw() {
 		// Create an in memory Image
-		BufferedImage img = new BufferedImage(width_px, height_px, BufferedImage.TYPE_INT_ARGB);
+		int xOffset_px=settings.getPadX_px()+settings.getMarkerLength()+settings.getTextSizeAxixDesignators();
+		int widthOfChartArea_px=width_px+2*xOffset_px;
+		
+		int yOffset_px=settings.getPadY_px()+settings.getMarkerLength()+settings.getTextSizeAxixDesignators();
+		int heightOfChartArea_px=height_px+2*yOffset_px;
+		
+		BufferedImage img = new BufferedImage(widthOfChartArea_px, heightOfChartArea_px, BufferedImage.TYPE_INT_ARGB);
 
 		// Grab the graphics object off the image
 		Graphics2D graphics = img.createGraphics();
 		graphics = assignRendieringHints(graphics);
 
 		// Draw
-		graphics = drawCartesian(graphics, dataSet);
+		graphics = drawCartesian(graphics, dataSet,xOffset_px,yOffset_px);
 		graphics = drawLineDiagram(graphics, dataSet);
 
 		// Save to file.
@@ -90,7 +96,7 @@ public class Chart {
 	 * @param dataSet  The data set
 	 * @return The {@Graphics2D}- object containing the coordinate system.
 	 */
-	private Graphics2D drawCartesian(Graphics2D graphics, DataSet dataSet) {
+	private Graphics2D drawCartesian(Graphics2D graphics, DataSet dataSet,int xOffset_px,int yOffset_px) {
 
 		graphics.setBackground(Color.WHITE);
 
@@ -127,22 +133,22 @@ public class Chart {
 		GradientPaint gradient;
 
 		if (settings.getFillDirection() == settings.TOP_DOWN)
-			gradient = new GradientPaint((float) 1, 0, c1, (float) (0), height_px, c2);
+			gradient = new GradientPaint((float) 0, 0, c1, (float) (0), height_px, c2);
 		else
-			gradient = new GradientPaint((float) 1, 0, c1, (float) (0), width_px, c2);
+			gradient = new GradientPaint((float) 0, 0, c1, (float) (0), width_px, c2);
 
 		graphics.setPaint(gradient);
 
-		graphics.fillRect(settings.getPadX_px(), settings.getPadY_px(), width_px - settings.getPadX_px() * 2,
+		graphics.fillRect(xOffset_px,yOffset_px, width_px - settings.getPadX_px() * 2,
 				height_px - settings.getPadY_px() * 2);
 
 		// Draw x- axis
 		graphics.setColor(settings.getAxisColor());
-		graphics.drawLine(settings.getPadX_px(), y0_px, width_px - settings.getPadX_px(), y0_px);
+		graphics.drawLine(xOffset_px, y0_px, width_px+xOffset_px-settings.getPadX_px(), y0_px);
 
 		// Draw y- axis
-		graphics.drawLine(settings.getPadX_px(), settings.getPadY_px(), settings.getPadX_px(),
-				height_px - settings.getPadY_px());
+		graphics.drawLine(xOffset_px, yOffset_px, xOffset_px,
+				height_px - yOffset_px);
 
 		// Draw markers for x- axis
 		graphics.setColor(settings.getAxisMarkersColor());
@@ -151,7 +157,7 @@ public class Chart {
 
 		graphics.setFont(new Font(settings.getFontName(), Font.PLAIN, settings.getTextSizeAxixDesignators()));
 
-		for (double x = 0; x < width_px - 2 * settings.getPadX_px(); x = x + settings.getMainX()) {
+		for (double x = 0; x < width_px ; x = x + settings.getMainX()) {
 			int xt = (int) getXT(x);
 			graphics.drawLine(xt, y0_px - 10, xt, y0_px + 10);
 
@@ -162,14 +168,22 @@ public class Chart {
 			}
 		}
 
+		//
+		//
+		// Check from here..............................
+		//
+		
+		
+		
+		
 		// Draw markers for y-axis
 		for (double y = yMin; y <= yMax; y = y + settings.getMainY()) {
 			int yt = (int) getYT(y);
-			graphics.drawLine(settings.getPadX_px() - 10, (int) yt, settings.getPadX_px() + 10, (int) yt);
+			graphics.drawLine(xOffset_px - 10, (int) yt+yOffset_px, xOffset_px + 10, (int) yt+yOffset_px);
 
 			if (y != yMax) {
 				int yc=getVertCenterCoordinate(settings.getTextSizeAxixDesignators(),yt);
-				graphics.drawString(y + "", settings.getPadX_px()+settings.getMarkerLength(), yc);
+				graphics.drawString(y + "", xOffset_px-settings.getMarkerLength()-getWidth(y+"", graphics), yc);
 			}
 		}
 		return graphics;

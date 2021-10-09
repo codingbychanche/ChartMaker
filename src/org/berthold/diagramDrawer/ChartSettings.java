@@ -41,7 +41,7 @@ public class ChartSettings {
 	private float dataPointThickness;
 
 	// Values
-	private String numberFormat = "%.2f";
+	private String numberFormat;
 
 	public ChartSettings(String name) {
 		super();
@@ -49,6 +49,8 @@ public class ChartSettings {
 		// Global settings
 		this.name = name;
 		this.fontName="SansSerif";
+		
+		numberFormat="%.2f";
 
 		// Set defaults
 		// Colors
@@ -68,9 +70,6 @@ public class ChartSettings {
 		this.dataPointThickness = 2f;
 		
 		// Axes
-		this.mainX=1;
-		this.mainY=2;
-		this.textSizeAxixDesignators=15;
 		this.axisMarkersColor=new Color(0,0,50);
 
 	}

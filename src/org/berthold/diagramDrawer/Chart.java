@@ -33,6 +33,9 @@ public class Chart {
 	private int y0_px;
 	double yMax, yMin, xMax;
 
+	int xOffset_px, yOffset_px;
+	int heightOfChartArea_px, widthOfChartArea_px;
+
 	/**
 	 * Creates a new chart.
 	 * 
@@ -53,7 +56,19 @@ public class Chart {
 		// Constants defining the gfx- window
 		yMax = dataSet.getAbsMax();
 		yMin = dataset.getAbsMin();
+		
+		if (Math.abs(yMax)>Math.abs(yMin))
+			yMin=yMax*-1;
+		else
+			yMax=yMin*-1;
+		
 		xMax = dataset.getAbsMaxX();
+
+		xOffset_px = settings.getPadX_px() + settings.getMarkerLength() + settings.getTextSizeAxixDesignators();
+		widthOfChartArea_px = width_px + 2 * xOffset_px;
+
+		yOffset_px = settings.getPadY_px() + settings.getMarkerLength() + settings.getTextSizeAxixDesignators();
+		heightOfChartArea_px = height_px + 2 * yOffset_px;
 	}
 
 	/**
@@ -62,12 +77,7 @@ public class Chart {
 	 */
 	public void draw() {
 		// Create an in memory Image
-		int xOffset_px=settings.getPadX_px()+settings.getMarkerLength()+settings.getTextSizeAxixDesignators();
-		int widthOfChartArea_px=width_px+2*xOffset_px;
-		
-		int yOffset_px=settings.getPadY_px()+settings.getMarkerLength()+settings.getTextSizeAxixDesignators();
-		int heightOfChartArea_px=height_px+2*yOffset_px;
-		
+
 		BufferedImage img = new BufferedImage(widthOfChartArea_px, heightOfChartArea_px, BufferedImage.TYPE_INT_ARGB);
 
 		// Grab the graphics object off the image
@@ -75,7 +85,7 @@ public class Chart {
 		graphics = assignRendieringHints(graphics);
 
 		// Draw
-		graphics = drawCartesian(graphics, dataSet,xOffset_px,yOffset_px);
+		graphics = drawCartesian(graphics, dataSet);
 		graphics = drawLineDiagram(graphics, dataSet);
 
 		// Save to file.
@@ -84,19 +94,19 @@ public class Chart {
 			ImageIO.write(img, "png", outputfile);
 		} catch (Exception e) {
 		}
-
+		
 		fontTest();
 	}
 
 	/**
-	 * Adds a cartesian coordinate system to the passed graphics object. Draws all
+	 * Adds a carthesian coordinate system to the passed graphics object. Draws all
 	 * axes, designators, etc....
 	 * 
 	 * @param graphics {@Graphics2D}- object.
 	 * @param dataSet  The data set
 	 * @return The {@Graphics2D}- object containing the coordinate system.
 	 */
-	private Graphics2D drawCartesian(Graphics2D graphics, DataSet dataSet,int xOffset_px,int yOffset_px) {
+	private Graphics2D drawCartesian(Graphics2D graphics, DataSet dataSet) {
 
 		graphics.setBackground(Color.WHITE);
 
@@ -109,21 +119,21 @@ public class Chart {
 		// coordinate system.
 		//
 		if (yMin == 0)
-			y0_px = (height_px - settings.getPadY_px());
+			y0_px = (height_px);
 
 		else {
 			if (Math.abs(yMin) == Math.abs(yMax))
-				y0_px = ((height_px - settings.getPadY_px()) / 2);
+				y0_px = ((height_px) / 2);
 
 			double f = 1;
 			if (Math.abs(yMin) > Math.abs(yMax)) {
 				f = Math.abs(yMax) / Math.abs(yMin);
-				y0_px = (int) ((int) (height_px - settings.getPadY_px()) * f);
+				y0_px = (int) ((int) (height_px) * f);
 			}
 
 			if (Math.abs(yMin) < Math.abs(yMax)) {
 				f = Math.abs(yMin) / Math.abs(yMax);
-				y0_px = (int) (height_px - (int) (height_px - settings.getPadY_px()) * f);
+				y0_px = (int) (height_px - (int) (height_px) * f);
 			}
 		}
 
@@ -139,16 +149,14 @@ public class Chart {
 
 		graphics.setPaint(gradient);
 
-		graphics.fillRect(xOffset_px,yOffset_px, width_px - settings.getPadX_px() * 2,
-				height_px - settings.getPadY_px() * 2);
+		graphics.fillRect(xOffset_px, yOffset_px, width_px, height_px);
 
 		// Draw x- axis
 		graphics.setColor(settings.getAxisColor());
-		graphics.drawLine(xOffset_px, y0_px, width_px+xOffset_px-settings.getPadX_px(), y0_px);
+		graphics.drawLine(xOffset_px, y0_px, width_px + xOffset_px, y0_px);
 
 		// Draw y- axis
-		graphics.drawLine(xOffset_px, yOffset_px, xOffset_px,
-				height_px - yOffset_px);
+		graphics.drawLine(xOffset_px, yOffset_px, xOffset_px, height_px + yOffset_px);
 
 		// Draw markers for x- axis
 		graphics.setColor(settings.getAxisMarkersColor());
@@ -157,34 +165,28 @@ public class Chart {
 
 		graphics.setFont(new Font(settings.getFontName(), Font.PLAIN, settings.getTextSizeAxixDesignators()));
 
-		for (double x = 0; x < width_px ; x = x + settings.getMainX()) {
+		for (double x = 0; x <= xMax; x = x + settings.getMainX()) {
 			int xt = (int) getXT(x);
 			graphics.drawLine(xt, y0_px - 10, xt, y0_px + 10);
 
 			// No '0' or biggest value for x- axis!
 			if (x != 0 && x != xMax) {
-				int xc=getHorizCenterCoordinate(x+"",xt,graphics); // Centers value below marker
-				graphics.drawString(x + "", xc, y0_px + settings.getTextSizeAxixDesignators()+settings.getMarkerLength());
+				
+				String xFormated=String.format("%.3f", x);
+				int xc = getHorizCenterCoordinate(xFormated, xt, graphics); // Centers value below marker
+				
+				graphics.drawString(xFormated, xc,
+						y0_px + settings.getTextSizeAxixDesignators() + settings.getMarkerLength());
 			}
 		}
 
-		//
-		//
-		// Check from here..............................
-		//
-		
-		
-		
-		
 		// Draw markers for y-axis
 		for (double y = yMin; y <= yMax; y = y + settings.getMainY()) {
 			int yt = (int) getYT(y);
-			graphics.drawLine(xOffset_px - 10, (int) yt+yOffset_px, xOffset_px + 10, (int) yt+yOffset_px);
+			graphics.drawLine(xOffset_px - 10, (int) yt, xOffset_px + 10, (int) yt);
 
-			if (y != yMax) {
-				int yc=getVertCenterCoordinate(settings.getTextSizeAxixDesignators(),yt);
-				graphics.drawString(y + "", xOffset_px-settings.getMarkerLength()-getWidth(y+"", graphics), yc);
-			}
+			int yc = getVertCenterCoordinate(settings.getTextSizeAxixDesignators(), yt);
+			graphics.drawString(y+"", xOffset_px - settings.getMarkerLength() - getWidth(y + "", graphics), yc);
 		}
 		return graphics;
 	}
@@ -202,7 +204,7 @@ public class Chart {
 		Stroke stroke = new BasicStroke(12f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 		graphics.setStroke(stroke);
 
-		// The color and the thikness...
+		// The color and the thickness...
 		graphics.setColor(settings.getDataPointsColor());
 		stroke = new BasicStroke(settings.getDataPointThickness());
 		graphics.setStroke(stroke);
@@ -240,7 +242,7 @@ public class Chart {
 
 		return graphics;
 	}
-	
+
 	/*
 	 * Shows all available system fonts.
 	 */
@@ -255,61 +257,60 @@ public class Chart {
 	}
 
 	/**
-	 * Transforms a y- koordinate.
+	 * Transforms a y- coordinate.
 	 * 
-	 * @param y y- koordinate
-	 * @return Transformed y- koordinate.
+	 * @param y To be transformed.
+	 * @return Transformed y- coordinate.
 	 */
 	private double getYT(double y) {
-
+			
+		
 		if (y > 0)
-			return y0_px - ((y0_px - settings.getPadY_px()) / yMax) * y;
+			return y0_px - ((height_px - y0_px - yOffset_px) / yMax) * y;
 		if (y < 0)
-			return y0_px + ((height_px - settings.getPadY_px() - y0_px) / yMin) * y;
+			return y0_px + ((height_px - yOffset_px - y0_px) / yMin) * y;
 
 		return (double) y0_px;
 	}
 
 	/**
-	 * Transforms a x- koordinate.
+	 * Transforms a x- coordinate.
 	 * 
-	 * @param x
-	 * @return Transformed x- koordinate.
+	 * @param x To be transformed
+	 * @return Transformed x- coordinate.
 	 */
 	private double getXT(double x) {
-		return x * ((width_px - 2 * settings.getPadX_px()) / xMax) + settings.getPadX_px();
+		return x * ((width_px - 2 * xOffset_px) / xMax) + xOffset_px;
 	}
-	
-	//
-	// Algorytms....
-	//
+
 	/**
 	 * Display width of a string in pixels.
 	 * 
 	 * @param string
-	 * @param g Associated {@ling Graphics} object.
-	 * @return	Width of string in pixels.
+	 * @param g      Associated {@ling Graphics} object.
+	 * @return Width of string in pixels.
 	 */
-	private int getWidth(String string,Graphics g) {
-		FontMetrics f=g.getFontMetrics();
+	private int getWidth(String string, Graphics g) {
+		FontMetrics f = g.getFontMetrics();
 		return f.stringWidth(string);
 	}
-	
+
 	/**
-	 * Calculates the x position of the upper left corner for a
-	 * string which centers it relative to a given coordinate.
-	 *  
+	 * Calculates the x position of the upper left corner for a string which centers
+	 * it relative to a given coordinate.
+	 * 
 	 * @param string The string.
-	 * @param x	Coordinate relative to which the given string should be centered
-	 * @param g Associated {@ling Graphics} object.
+	 * @param x      Coordinate relative to which the given string should be
+	 *               centered
+	 * @param g      Associated {@ling Graphics} object.
 	 * @return The upper left coordinate of the centered string.
 	 */
-	private int getHorizCenterCoordinate(String string,int x,Graphics g) {
-		int widthOfString=getWidth(string,g);
-		return x-widthOfString/2;
+	private int getHorizCenterCoordinate(String string, int x, Graphics g) {
+		int widthOfString = getWidth(string, g);
+		return x - widthOfString / 2;
 	}
-	
-	private int getVertCenterCoordinate(int heightOfString,int y) {
-		return y+heightOfString/2;
+
+	private int getVertCenterCoordinate(int heightOfString, int y) {
+		return y + heightOfString / 2;
 	}
 }
